@@ -37,7 +37,7 @@ class LoginView(FormView):
         else:
             return HttpResponseRedirect(reverse('login'))
 
-
+# Dit is nog een oude view die nu nieet gebruikt word door ansfridus 
 class LoginResponseView(View):
     def get(self, request, *args, **kwargs):
         oauth = OAuth2Session(client_id=settings.IDP_CLIENT_ID,
