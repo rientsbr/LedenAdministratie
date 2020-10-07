@@ -1,6 +1,6 @@
 ![Docker](https://github.com/djoamersfoort/LedenAdministratie/workflows/Docker/badge.svg)
 
-# DJO LedenAdministratie
+# LedenAdministratie
 Dit is de source voor de DJO Ledenadminstratie. Geschreven in Python/Django. Features:
 
 ## Features
