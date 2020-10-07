@@ -173,16 +173,9 @@ class InvoiceTool:
         if reminder:
             subject = 'Herinnering: {0}'.format(subject)
         body = render_to_string(template, context={'invoice': invoice, 'member_types': member_types})
-
-        # Send to own address by default
-        if invoice.member.email_ouders == '':
-            recipients = [invoice.member.email_address]
-        else:
+        recipients = [invoice.member.email_address]
+        if invoice.member.email_ouders != '':
             recipients = invoice.member.email_ouders.split(',')
-            # Also send to senior member's own address
-            if invoice.member.is_senior():
-                recipients.append(invoice.member.email_address)
-
         message = EmailMessage()
         message.from_email = settings.EMAIL_SENDER_INVOICE
         message.to = recipients
