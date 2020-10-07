@@ -23,13 +23,19 @@ from .mixins import PermissionRequiredMixin
 from .utils import Utils
 
 
-class LoginView(View):
-    def get(self, request, *args, **kwargs):
-        oauth = OAuth2Session(client_id=settings.IDP_CLIENT_ID,
-                              redirect_uri=settings.IDP_REDIRECT_URL,
-                              scope=['user/basic', 'user/account-type', 'user/names', 'user/email'])
-        auth_url, state = oauth.authorization_url(settings.IDP_AUTHORIZE_URL)
-        return HttpResponseRedirect(auth_url)
+class LoginView(FormView):
+    form_class = forms.LoginForm
+    template_name = 'login.html'
+
+    def form_valid(self, form):
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user = authenticate(username=username, password=password)
+        if user and user.is_active:
+            auth_login(self.request, user)
+            return HttpResponseRedirect(reverse('members'))
+        else:
+            return HttpResponseRedirect(reverse('login'))
 
 
 class LoginResponseView(View):
@@ -78,7 +84,7 @@ class LogoffView(PermissionRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         logout(request)
-        return HttpResponse(content='Uitgelogd')
+        return HttpResponseRedirect('/')
 
 
 class MemberListView(PermissionRequiredMixin, ListView):
@@ -176,7 +182,7 @@ class MemberAddNoteView(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         member_id = self.kwargs['member_id']
         form.instance.member = Member.objects.get(pk=member_id)
-        form.instance.username = self.request.user.first_name
+        form.instance.username = self.request.user.username
         return super().form_valid(form)
 
 
@@ -268,7 +274,7 @@ class InvoiceCreateView(PermissionRequiredMixin, FormView):
             invoice.amount = InvoiceTool.calculate_grand_total(self.lines)
             invoice.amount_payed = 0.00
             invoice.created = timezone.now()
-            invoice.username = self.request.user.first_name
+            invoice.username = self.request.user.username
             invoice.save()
             invoice.pdf = InvoiceTool.render_invoice(member, self.lines, invoice.invoice_number,
                                                      form.cleaned_data['invoice_types'])
