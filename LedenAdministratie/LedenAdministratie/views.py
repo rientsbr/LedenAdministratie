@@ -1,4 +1,4 @@
-from django.contrib.auth import logout, login as auth_login
+from django.contrib.auth import logout, login as auth_login, authenticate
 from django.contrib.auth.models import User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView, BaseDetailView, View
 from django.views.generic.list import ListView
