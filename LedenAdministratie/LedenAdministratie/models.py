@@ -102,7 +102,7 @@ class Member(models.Model):
     gebdat = models.DateField(verbose_name='Geboorte Datum')
     geslacht = models.CharField(max_length=1, choices=(('m', 'Man'), ('v', 'Vrouw'), ('o', 'Anders')), blank=False,
                                 null=False, default='m')
-    speltak = models.CharField(max_length=40)
+    speltak = models.CharField(max_length=40, blank=True)
     types = models.ManyToManyField(MemberType)									# Nieuw voor
     email_address = models.EmailField(max_length=200, validators=[EmailValidator(message='E-mail adres is ongeldig')])
     straat = models.CharField(max_length=255)
