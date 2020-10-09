@@ -89,6 +89,7 @@ class LogoffView(PermissionRequiredMixin, View):
 
 class LidAanmeldView(CreateView):
     model = Member
+    form_class = forms.MemberForm
     template_name = 'aanmelden_lid.html'
     success_url = reverse_lazy('aanmelden_ok')
 
