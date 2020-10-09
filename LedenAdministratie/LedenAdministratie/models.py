@@ -72,18 +72,8 @@ class Member(models.Model):
         elif age_at_endofyear >=25:
             speltak = 'Leiding'
         return speltak
-		
-    def _calculate_foto(self):
-        if self.fotopubliek:
-            return 'Ja'
-        else:
-            return 'Nee'
 
-    def _calculate_foto2(self):
-        if self.fotobinnen:
-            return 'Ja'
-        else:
-            return 'Nee'
+
 
     def idp_types(self):
         result = []
@@ -113,7 +103,7 @@ class Member(models.Model):
     geslacht = models.CharField(max_length=1, choices=(('m', 'Man'), ('v', 'Vrouw'), ('o', 'Anders')), blank=False,
                                 null=False, default='m')
     speltak = models.CharField(max_length=40)
-    types = models.ManyToManyField(MemberType)									# Nieuw voor 
+    types = models.ManyToManyField(MemberType)									# Nieuw voor
     email_address = models.EmailField(max_length=200, validators=[EmailValidator(message='E-mail adres is ongeldig')])
     straat = models.CharField(max_length=255)
     postcode = models.CharField(max_length=7, validators=[RegexValidator(regex='\d\d\d\d\s?[A-Za-z]{2}', message='De postcode is ongeldig')])
@@ -140,9 +130,9 @@ class Member(models.Model):
     foto = models.BinaryField(blank=True, null=True, verbose_name='Foto', editable=True)
     thumbnail = models.BinaryField(blank=True, null=True, verbose_name='Thumbnail', editable=True)
     age = property(_calculate_age)
-    wachtlijst_speltak = property(_calculate_speltak) 
-	foto1 = property(_calculate_foto)
-    foto2 = property(_calculate_foto2)
+    wachtlijst_speltak = property(_calculate_speltak)
+#	foto1 = property(_calculate_foto)
+#    foto2 = property(_calculate_foto2)
 
 
 class Note(models.Model):
