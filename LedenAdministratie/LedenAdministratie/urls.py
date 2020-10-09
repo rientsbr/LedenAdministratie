@@ -49,7 +49,7 @@ urlpatterns = [
     path('api/v1/idp/details/<str:fields>', api.ApiV1IDPGetDetails.as_view()),
     path('api/v1/idp/verify/<str:fields>', api.ApiV1IDPVerify.as_view()),
     path('api/v1/idp/avatar', api.ApiV1IDPAvatar.as_view()),
-#    re_path(r'^aanmelden/$', views.LidAanmeldView.as_view(), name='lid_aanmelden'),
+    path('aanmelden/', views.LidAanmeldView.as_view(), name='lid_aanmelden'),
 #    re_path(r'^aanmelden_ok/$', views.aanmelden_ok, name='aanmelden_ok'),
     path('', views.LoginView.as_view(), name='login'),
 ]
