@@ -99,7 +99,7 @@ class Member(models.Model):
     bijzonderheden= models.CharField(max_length=200, blank=False)
     verzekering_nr = models.CharField(max_length=200, blank=False)
     aanmeld_datum = models.DateField(verbose_name='Aanmeld datum', auto_now=False)
-    inschrijf_datum_sn = models.DateField(verbose_name='Aanmeld datum', auto_now=False)
+    inschrijf_datum_sn = models.DateField(verbose_name='Inschrijf Scouting NL', auto_now=False)
     afmeld_datum = models.DateField(verbose_name='Afmeld datum', null=True, blank=True)
     fotopubliek = models.BooleanField(null=False, default=False)
     fotobinnen = models.BooleanField(null=False, default=False)
