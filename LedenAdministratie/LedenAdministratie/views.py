@@ -87,6 +87,27 @@ class LogoffView(PermissionRequiredMixin, View):
         return HttpResponseRedirect('/')
 
 
+class LidAanmeldView(CreateView):
+    model = Member
+    form_class = forms.LidCaptchaForm
+    template_name = 'aanmelden_lid.html'
+    success_url = reverse_lazy('aanmelden_ok')
+
+    def form_valid(self, form):
+        # Send an e-mail to 'bestuur'
+        subject = 'Nieuwe aanmelding St. Ansfridus ontvangen'
+        body = render_to_string('aanmelden_email.html', context={'lid': form.instance})
+        send_mail(subject=subject, message=body, from_email=settings.EMAIL_SENDER,
+                  recipient_list=settings.EMAIL_RECIPIENTS_NEW)
+
+        # Send a confirmation e-mail to the user
+        subject = 'Bevestiging aanmelding St. Ansfridus'
+        body = render_to_string('aanmelden_email_user.html', context={'lid': form.instance})
+        send_mail(subject=subject, message=body, from_email=settings.EMAIL_SENDER,
+                  recipient_list=[form.instance.email_address])
+
+        return super(LidAanmeldView, self).form_valid(form)
+
 class MemberListView(PermissionRequiredMixin, ListView):
     template_name = 'memberlist.html'
     required_permission = 'LedenAdministratie.view_member'
