@@ -51,6 +51,11 @@ class Migration(migrations.Migration):
             name='bijzonderheden',
             field=models.CharField(max_length=200),
         ),
+        migrations.AddField(
+            model_name='member',
+            name='inschrijf_datum_sn',
+            field=models.DateField(blank=True, null=True),
+        ),
         migrations.RenameField(
             model_name='member',
             old_name='tshirt',
