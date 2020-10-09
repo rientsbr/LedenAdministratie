@@ -37,7 +37,7 @@ class LoginView(FormView):
         else:
             return HttpResponseRedirect(reverse('login'))
 
-# Dit is nog een oude view die nu nieet gebruikt word door ansfridus 
+# Dit is nog een oude view die nu nieet gebruikt word door ansfridus
 class LoginResponseView(View):
     def get(self, request, *args, **kwargs):
         oauth = OAuth2Session(client_id=settings.IDP_CLIENT_ID,
@@ -89,7 +89,6 @@ class LogoffView(PermissionRequiredMixin, View):
 
 class LidAanmeldView(CreateView):
     model = Member
-    form_class = forms.LidCaptchaForm
     template_name = 'aanmelden_lid.html'
     success_url = reverse_lazy('aanmelden_ok')
 
