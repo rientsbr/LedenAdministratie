@@ -50,6 +50,41 @@ class Member(models.Model):
     def get_types_display(self):
         return ','.join([tmptype.display_name for tmptype in self.types.all()])
 
+    def _calculate_speltak(self):
+        endofyear = date.today().replace(month=12, day=31)
+
+        age_at_endofyear = self._calculate_age(endofyear)
+        speltak = 'Onbekend'
+        if age_at_endofyear < 5:
+            speltak = 'Te Jong'
+        elif age_at_endofyear >= 5 and age_at_endofyear < 7:
+            speltak = 'Bevers'
+        elif age_at_endofyear >=7 and age_at_endofyear < 11:
+            speltak = 'Welpen'
+        elif age_at_endofyear >=11 and age_at_endofyear < 15:
+            speltak = 'Scouts'
+        elif age_at_endofyear >=15 and age_at_endofyear < 18:
+            speltak = 'Explorers'
+        elif age_at_endofyear >= 18 and age_at_endofyear < 21:
+            speltak = 'Roverscouts'
+        elif age_at_endofyear >=21 and age_at_endofyear < 25:
+            speltak = 'Stam'
+        elif age_at_endofyear >=25:
+            speltak = 'Leiding'
+        return speltak
+		
+    def _calculate_foto(self):
+        if self.fotopubliek:
+            return 'Ja'
+        else:
+            return 'Nee'
+
+    def _calculate_foto2(self):
+        if self.fotobinnen:
+            return 'Ja'
+        else:
+            return 'Nee'
+
     def idp_types(self):
         result = []
         for membertype in self.types.all():
@@ -78,35 +113,36 @@ class Member(models.Model):
     geslacht = models.CharField(max_length=1, choices=(('m', 'Man'), ('v', 'Vrouw'), ('o', 'Anders')), blank=False,
                                 null=False, default='m')
     speltak = models.CharField(max_length=40)
-    types = models.ManyToManyField(MemberType)
+    types = models.ManyToManyField(MemberType)									# Nieuw voor 
     email_address = models.EmailField(max_length=200, validators=[EmailValidator(message='E-mail adres is ongeldig')])
     straat = models.CharField(max_length=255)
-    postcode = models.CharField(max_length=7, validators=[
-        RegexValidator(regex='\d\d\d\d\s?[A-Za-z]{2}', message='De postcode is ongeldig')])
+    postcode = models.CharField(max_length=7, validators=[RegexValidator(regex='\d\d\d\d\s?[A-Za-z]{2}', message='De postcode is ongeldig')])
     woonplaats = models.CharField(max_length=100)
     telnr = models.CharField(max_length=30, blank=True)
     mobiel = models.CharField(max_length=30, blank=True)
-    mobiel_ouder1 = models.CharField(max_length=30, blank=True)
-    mobiel_ouder2 = models.CharField(max_length=30, blank=True)
-    telnr_ouders = models.CharField(max_length=30, blank=False)
-    email_ouders = models.CharField(max_length=200, blank=False)
-    email_ouder1 = models.CharField(max_length=200, blank=False)
-    email_ouder2 = models.CharField(max_length=200, blank=False)
-    scouting_nr = models.CharField(max_length=200, blank=False)
-    tshirt_maat = models.CharField(max_length=200, blank=False)
-    jub_badge = models.CharField(max_length=200, blank=False)
-    opmerkingen = models.CharField(max_length=200, blank=False)
-    bijzonderheden= models.CharField(max_length=200, blank=False)
-    verzekering_nr = models.CharField(max_length=200, blank=False)
-    aanmeld_datum = models.DateField(verbose_name='Aanmeld datum', auto_now=False)
-    inschrijf_datum_sn = models.DateField(verbose_name='Inschrijf Scouting NL', auto_now=False)
+    mobiel_ouder1 = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
+    mobiel_ouder2 = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
+#    telnr_ouders = models.CharField(max_length=30, blank=False)
+#    email_ouders = models.CharField(max_length=200, blank=False)
+    email_ouder1 = models.EmailField(max_length=150, blank=True)
+    email_ouder2 = models.EmailField(max_length=150, blank=True)
+    aanmeld_datum = models.DateField(auto_now_add=True, auto_now=False)
     afmeld_datum = models.DateField(verbose_name='Afmeld datum', null=True, blank=True)
+    inschrijf_datum_sn = models.DateField(null=True, blank=True)
+    scouting_nr = models.CharField(max_length=20, blank=True)
+    tshirt_maat = models.CharField(max_length=20, blank=True)
+    jub_badge = models.CharField(max_length=20, blank=True)
+    verzekerings_nr = models.CharField(max_length=20, blank=True)
+    opmerkingen = models.TextField(max_length=1024, blank=True)
+    bijzonderheden = models.TextField(max_length=1024, blank=True)
     fotopubliek = models.BooleanField(null=False, default=False)
     fotobinnen = models.BooleanField(null=False, default=False)
     foto = models.BinaryField(blank=True, null=True, verbose_name='Foto', editable=True)
     thumbnail = models.BinaryField(blank=True, null=True, verbose_name='Thumbnail', editable=True)
-#    hoe_gevonden = models.CharField(max_length=255, blank=True, null=False, default='')
     age = property(_calculate_age)
+    wachtlijst_speltak = property(_calculate_speltak) 
+	foto1 = property(_calculate_foto)
+    foto2 = property(_calculate_foto2)
 
 
 class Note(models.Model):
