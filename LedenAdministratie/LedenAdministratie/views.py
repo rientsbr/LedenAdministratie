@@ -96,13 +96,13 @@ class LidAanmeldView(CreateView):
     def form_valid(self, form):
         # Send an e-mail to 'bestuur'
         subject = 'Nieuwe aanmelding St. Ansfridus ontvangen'
-        body = render_to_string('aanmelden_email.html', context={'lid': form.instance})
+        body = render_to_string('aanmelden_email.html', context={'member': form.instance})
         send_mail(subject=subject, message=body, from_email=settings.EMAIL_SENDER,
                   recipient_list=settings.EMAIL_RECIPIENTS_NEW)
 
         # Send a confirmation e-mail to the user
         subject = 'Bevestiging aanmelding St. Ansfridus'
-        body = render_to_string('aanmelden_email_user.html', context={'lid': form.instance})
+        body = render_to_string('aanmelden_email_user.html', context={'member': form.instance})
         send_mail(subject=subject, message=body, from_email=settings.EMAIL_SENDER,
                   recipient_list=[form.instance.email_address])
 
@@ -149,7 +149,7 @@ class MemberUpdateView(PermissionRequiredMixin, UpdateView):
 class MemberCreateView(PermissionRequiredMixin, CreateView):
     model = Member
     template_name = 'edit_member.html'
-    success_url = reverse_lazy('members')
+#    success_url = reverse_lazy('members')
     form_class = forms.MemberForm
     extra_context = {'types': MemberType.objects.all()}
     required_permission = 'LedenAdministratie.add_member'
@@ -159,23 +159,25 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
         redirect = super().form_valid(form)
 
         # Send 'welcome' e-mail to new member + parents
-        recipients = form.cleaned_data['email_ouder1'].split(',')
-        recipients.append(form.cleaned_data['email_address'])
+#        recipients = form.cleaned_data['email_ouder1'].split(',')
+#        recipients.append(form.cleaned_data['email_address'])
 
-        message = EmailMessage()
-        message.to = recipients
-        message.subject = "Welkom bij DJO Amersfoort!"
-        message.from_email = settings.EMAIL_SENDER
-        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
-        message.content_subtype = 'html'
+#        message = EmailMessage()
+#        message.to = recipients
+#        message.subject = "Welkom bij St Ansfridus Amersfoort!"
+#        message.from_email = settings.EMAIL_SENDER
+#        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
+#        message.content_subtype = 'html'
 
-        response = requests.get(Utils.get_setting('welcome_pdf_location'))
-        if response.ok:
-            message.attach('Welkom bij DJO Amersfoort.pdf', response.content)
-            Utils.send_email(message, self.request.user.first_name, form.instance)
+#        response = requests.get(Utils.get_setting('welcome_pdf_location'))
+#        if response.ok:
+#            message.attach('Welkom bij Ansfridus Amersfoort.pdf', response.content)
+#            Utils.send_email(message, self.request.user.first_name, form.instance)
 
         return redirect
 
+    def get_success_url(self):
+        return reverse('members')
 
 class MemberDeleteView(PermissionRequiredMixin, DeleteView):
     model = Member
