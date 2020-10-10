@@ -4,6 +4,7 @@ mysqlclient
 python-dateutil
 Weasyprint
 requests-oauthlib
+django-allauth
 Pillow
 django-tinymce==2.9.0
 django-dkim
