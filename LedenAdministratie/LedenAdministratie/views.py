@@ -159,15 +159,15 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
         redirect = super().form_valid(form)
 
         # Send 'welcome' e-mail to new member + parents
-#        recipients = form.cleaned_data['email_ouder1'].split(',')
-#        recipients.append(form.cleaned_data['email_address'])
+        recipients = form.cleaned_data['email_ouder1'].split(',')
+        recipients.append(form.cleaned_data['email_address'])
 
-#        message = EmailMessage()
-#        message.to = recipients
-#        message.subject = "Welkom bij St Ansfridus Amersfoort!"
-#        message.from_email = settings.EMAIL_SENDER
-#        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
-#        message.content_subtype = 'html'
+        message = EmailMessage()
+        message.to = recipients
+        message.subject = "Welkom bij St Ansfridus Amersfoort!"
+        message.from_email = settings.EMAIL_SENDER
+        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
+        message.content_subtype = 'html'
 
 #        response = requests.get(Utils.get_setting('welcome_pdf_location'))
 #        if response.ok:

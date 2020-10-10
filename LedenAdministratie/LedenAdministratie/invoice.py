@@ -88,18 +88,18 @@ class InvoiceTool:
     @staticmethod
     def get_defaults_for_invoice_type(invoice_type):
         defaults = [{
-            'description': 'Contributie {0} DJO Amersfoort'.format(date.today().year),
+            'description': 'Contributie {0} Scouting St Ansfridus Amersfoort'.format(date.today().year),
             'count': 1,
             'amount': Utils.get_setting('invoice_amount_year')}]
 
         if invoice_type == 'senior':
             defaults = [{
-                'description': 'Contributie senior lid {0} DJO Amersfoort'.format(date.today().year),
+                'description': 'Contributie senior lid {0} Scouting St Ansfridus Amersfoort'.format(date.today().year),
                 'count': 1,
                 'amount': Utils.get_setting('invoice_amount_year_senior')}]
         elif invoice_type == 'maart':
             defaults = [{
-                    'description': 'Contributie {0} DJO Amersfoort'.format(date.today().year),
+                    'description': 'Contributie {0} Scouting St Ansfridus Amersfoort'.format(date.today().year),
                     'count': 1,
                     'amount': Utils.get_setting('invoice_amount_year')
                 },
@@ -154,15 +154,11 @@ class InvoiceTool:
             members = Member.objects.filter(types__slug='member', aanmeld_datum__gt=date(date.today().year, 2, 28))
         elif invoice_type == 'strippenkaart':
             members = Member.objects.filter(types__slug='strippenkaart')
-        elif invoice_type == '2dagen':
-            members = Member.objects.filter(types__slug='member', dag_vrijdag=True, dag_zaterdag=True)
         elif invoice_type == 'custom':
             members = Member.objects.all()
 
         # Only return active members
         members = members.filter(Q(afmeld_datum__gt=date.today()) | Q(afmeld_datum=None))
-        if invoice_type != '2dagen':
-            members = members.exclude(dag_vrijdag=True, dag_zaterdag=True)
 
         return members
 
@@ -175,10 +171,10 @@ class InvoiceTool:
         body = render_to_string(template, context={'invoice': invoice, 'member_types': member_types})
 
         # Send to own address by default
-        if invoice.member.email_ouders == '':
+        if invoice.member.email_ouder1 == '':
             recipients = [invoice.member.email_address]
         else:
-            recipients = invoice.member.email_ouders.split(',')
+            recipients = invoice.member.email_ouder1.split(',')
             # Also send to senior member's own address
             if invoice.member.is_senior():
                 recipients.append(invoice.member.email_address)
