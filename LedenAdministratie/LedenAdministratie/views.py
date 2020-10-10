@@ -159,7 +159,7 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
         redirect = super().form_valid(form)
 
         # Send 'welcome' e-mail to new member + parents
-        recipients = form.cleaned_data['email_ouders'].split(',')
+        recipients = form.cleaned_data['email_ouder1'].split(',')
         recipients.append(form.cleaned_data['email_address'])
 
         message = EmailMessage()
@@ -417,7 +417,7 @@ class ExportView(PermissionRequiredMixin, FormView):
         for member in members:
             writer.writerow([member.first_name, member.last_name, member.gebdat, member.age, member.geslacht,
                              member.email_address, member.straat, member.postcode, member.woonplaats, member.telnr,
-                             member.telnr_ouders, member.email_ouders])
+                             member.mobiel_ouder1, member.email_ouder1])
 
         return response
 
@@ -467,7 +467,7 @@ class EmailSendView(PermissionRequiredMixin, FormView):
                     to_list.append(recipient.email_address)
             else:
                 if 'parents' in form.cleaned_data['recipients']:
-                    for address in recipient.email_ouders.split(','):
+                    for address in recipient.email_ouder1.split(','):
                         to_list.append(address)
                 if 'members' in form.cleaned_data['recipients']:
                     to_list.append(recipient.email_address)
