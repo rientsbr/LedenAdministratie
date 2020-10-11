@@ -22,6 +22,20 @@ from .invoice import InvoiceTool
 from .mixins import PermissionRequiredMixin
 from .utils import Utils
 
+# Oude
+#def login(request):
+#    form = forms.LoginForm()
+#
+#    if request.method == 'POST':
+#        form = forms.LoginForm(request.POST)
+#        if form.is_valid():
+#            username = form.cleaned_data['username']
+#            url = reverse_lazy('openid_login')
+#            url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/ledenlijst/')
+#            return django.http.HttpResponseRedirect(url)
+#
+#    return render(request, 'login.html', {'form': form})
+
 
 class LoginView(FormView):
     form_class = forms.LoginForm
@@ -30,12 +44,16 @@ class LoginView(FormView):
     def form_valid(self, form):
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']
-        user = authenticate(username=username, password=password)
-        if user and user.is_active:
+#        user = authenticate(username=username, password=password)
+        url = reverse_lazy('openid_login')
+        url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/members/')
+        return HttpResponseRedirect(reverse(url))
+
+#        if user and user.is_active:
             auth_login(self.request, user)
             return HttpResponseRedirect(reverse('members'))
-        else:
-            return HttpResponseRedirect(reverse('login'))
+#        else:
+#            return HttpResponseRedirect(reverse('login'))
 
 # Dit is nog een oude view die nu nieet gebruikt word door ansfridus
 class LoginResponseView(View):
