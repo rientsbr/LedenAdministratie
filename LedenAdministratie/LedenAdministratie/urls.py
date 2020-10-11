@@ -51,6 +51,6 @@ urlpatterns = [
     path('api/v1/idp/avatar', api.ApiV1IDPAvatar.as_view()),
     path('aanmelden/', views.LidAanmeldView.as_view(), name='lid_aanmelden'),
 #    re_path(r'^aanmelden_ok/$', views.aanmelden_ok, name='aanmelden_ok'),
-    path('accounts/', include('allauth.urls')),
+    path('accounts/', include('allauth.socialaccount.providers.openid.urls')),
     path('', views.LoginView.as_view(), name='login'),
 ]
