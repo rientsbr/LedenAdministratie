@@ -37,6 +37,47 @@ class LoginView(FormView):
         else:
             return HttpResponseRedirect(reverse('login'))
 
+# Dit is nog een oude view die nu nieet gebruikt word door ansfridus
+class LoginResponseView(View):
+    def get(self, request, *args, **kwargs):
+        oauth = OAuth2Session(client_id=settings.IDP_CLIENT_ID,
+                              redirect_uri=settings.IDP_REDIRECT_URL)
+        full_response_url = request.build_absolute_uri()
+        full_response_url = full_response_url.replace('http:', 'https:')
+        try:
+            access_token = oauth.fetch_token(settings.IDP_TOKEN_URL,
+                                             authorization_response=full_response_url,
+                                             client_secret=settings.IDP_CLIENT_SECRET)
+        except:
+            # Something went wrong getting the token
+            return HttpResponseForbidden('Geen toegang')
+
+        if 'access_token' in access_token and access_token['access_token'] != '':
+            user_profile = oauth.get(settings.IDP_API_URL).json()
+            username = "idp-{0}".format(user_profile['result']['id'])
+            for granted_role in user_profile['result']['accountType'].lower().split(','):
+                if settings.IDP_REQUIRED_ROLE == granted_role:
+                    break
+            else:
+                return HttpResponseForbidden('Verplichte rol niet toegekend')
+
+            try:
+                found_user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                found_user = User()
+                found_user.username = username
+                found_user.password = uuid.uuid4()
+                found_user.email = user_profile['result']['email']
+                found_user.first_name = user_profile['result']['firstName']
+                found_user.last_name = user_profile['result']['lastName']
+                found_user.is_superuser = True
+                found_user.save()
+
+            auth_login(request, found_user)
+
+            return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+        else:
+            return HttpResponseForbidden('IDP Login mislukt')
 
 
 class LogoffView(PermissionRequiredMixin, View):
@@ -131,7 +172,7 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
 #        response = requests.get(Utils.get_setting('welcome_pdf_location'))
 #        if response.ok:
 #            message.attach('Welkom bij Ansfridus Amersfoort.pdf', response.content)
-       Utils.send_email(message, self.request.user.first_name, form.instance)
+#            Utils.send_email(message, self.request.user.first_name, form.instance)
 
         return redirect
 
@@ -468,3 +509,4 @@ class SettingsView(PermissionRequiredMixin, FormView):
             setting.value = form.cleaned_data[field]
             setting.save()
         return super().form_valid(form)
+        
