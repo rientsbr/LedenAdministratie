@@ -50,7 +50,17 @@ class LoginView(FormView):
 #            url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/members/')
 #            return django.http.HttpResponseRedirect(url)
 #
-#    return render(request, 'login.html', {'form': form})
+   def form_valid(self, form):
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user = authenticate(username=username, password=password)
+        if user and user.is_active:
+            auth_login(self.request, user)
+            return HttpResponseRedirect(reverse('members'))
+        else:
+            return HttpResponseRedirect(reverse('login'))
+
+
 
 
 # Dit is nog een oude view die nu nieet gebruikt word door ansfridus
