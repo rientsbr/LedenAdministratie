@@ -172,7 +172,7 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
 #        response = requests.get(Utils.get_setting('welcome_pdf_location'))
 #        if response.ok:
 #            message.attach('Welkom bij Ansfridus Amersfoort.pdf', response.content)
-#            Utils.send_email(message, self.request.user.first_name, form.instance)
+            Utils.send_email(message, self.request.user.first_name, form.instance)
 
         return redirect
 
@@ -509,4 +509,3 @@ class SettingsView(PermissionRequiredMixin, FormView):
             setting.value = form.cleaned_data[field]
             setting.save()
         return super().form_valid(form)
-        
