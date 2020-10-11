@@ -50,8 +50,8 @@ class LoginView(FormView):
         return HttpResponseRedirect(reverse(url))
 
 #        if user and user.is_active:
-#            auth_login(self.request, user)
-#            return HttpResponseRedirect(reverse('members'))
+            auth_login(self.request, user)
+            return HttpResponseRedirect(reverse('members'))
 #        else:
 #            return HttpResponseRedirect(reverse('login'))
 
