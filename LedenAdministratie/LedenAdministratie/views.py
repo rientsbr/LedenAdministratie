@@ -37,16 +37,18 @@ from .utils import Utils
 #        else:
 #            return HttpResponseRedirect(reverse('login'))
 
-class LoginView(FormView):
-    form_class = forms.LoginForm
-    template_name = 'login.html'
+def login(request):
+    form = forms.LoginForm()
 
-    def form_valid(self, form):
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password']
-        url = reverse_lazy('openid_login')
-        url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/members/')
-        return HttpResponseRedirect(url)
+    if request.method == 'POST':
+        form = forms.LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            url = reverse_lazy('openid_login')
+            url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/ledenlijst/')
+            return django.http.HttpResponseRedirect(url)
+
+    return render(request, 'login.html', {'form': form})
 
 
 # Dit is nog een oude view die nu nieet gebruikt word door ansfridus
