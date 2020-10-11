@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^tinymce/', include('tinymce.urls')),
     path('members/<filter_slug>/', views.MemberListView.as_view(), name='members'),
+    path('accounts/', include('allauth.urls')),
     path('members/', views.MemberListView.as_view(), name='members'),
     path('logoff/', views.LogoffView.as_view(), name='logoff'),
     path('export/', views.ExportView.as_view(), name='export'),
@@ -51,5 +52,6 @@ urlpatterns = [
     path('api/v1/idp/avatar', api.ApiV1IDPAvatar.as_view()),
     path('aanmelden/', views.LidAanmeldView.as_view(), name='lid_aanmelden'),
 #    re_path(r'^aanmelden_ok/$', views.aanmelden_ok, name='aanmelden_ok'),
-    path('', views.LoginView.as_view(), name='login'),
+#    path('', views.LoginView.as_view(), name='login'),
+    path('', views.login, name='login'),
 ]
