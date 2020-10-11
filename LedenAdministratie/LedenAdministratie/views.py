@@ -47,7 +47,7 @@ class LoginView(FormView):
 #        user = authenticate(username=username, password=password)
         url = reverse_lazy('openid_login')
         url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/members/')
-        return HttpResponseRedirect(reverse(url))
+        return HttpResponseRedirect(url)
 
 #        if user and user.is_active:
 #            auth_login(self.request, user)
