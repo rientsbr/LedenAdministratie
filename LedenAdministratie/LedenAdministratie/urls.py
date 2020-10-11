@@ -1,5 +1,4 @@
 """LedenAdministratie URL Configuration
-
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.8/topics/http/urls/
 Examples:
@@ -51,7 +50,5 @@ urlpatterns = [
     path('api/v1/idp/avatar', api.ApiV1IDPAvatar.as_view()),
     path('aanmelden/', views.LidAanmeldView.as_view(), name='lid_aanmelden'),
 #    re_path(r'^aanmelden_ok/$', views.aanmelden_ok, name='aanmelden_ok'),
-    path('accounts/', include('allauth.socialaccount.providers.openid.urls')),
     path('', views.LoginView.as_view(), name='login'),
-#    path('', views.login, name='login'),
 ]

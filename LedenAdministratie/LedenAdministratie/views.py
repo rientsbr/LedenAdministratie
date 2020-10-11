@@ -1,4 +1,3 @@
-from django.shortcuts import render, redirect
 from django.contrib.auth import logout, login as auth_login, authenticate
 from django.contrib.auth.models import User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView, BaseDetailView, View
@@ -15,7 +14,6 @@ from django.template.loader import render_to_string
 import csv
 import uuid
 import requests
-#import django.http
 from datetime import date
 
 from .models import *
@@ -38,21 +36,6 @@ class LoginView(FormView):
             return HttpResponseRedirect(reverse('members'))
         else:
             return HttpResponseRedirect(reverse('login'))
-
-#def login(request):
-#    form = forms.LoginForm()
-#
-#    if request.method == 'POST':
-#        form = forms.LoginForm(request.POST)
-#        if form.is_valid():
-#            username = form.cleaned_data['username']
-#            url = reverse_lazy('openid_login')
-#            url += '?openid=%s/%s&next=%s' % ('https://login.scouting.nl/user', username, '/members/')
-#            return django.http.HttpResponseRedirect(url)
-
-
-
-
 
 # Dit is nog een oude view die nu nieet gebruikt word door ansfridus
 class LoginResponseView(View):
@@ -526,3 +509,4 @@ class SettingsView(PermissionRequiredMixin, FormView):
             setting.value = form.cleaned_data[field]
             setting.save()
         return super().form_valid(form)
+        
