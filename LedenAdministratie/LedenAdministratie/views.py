@@ -155,20 +155,28 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
     required_permission = 'LedenAdministratie.add_member'
 
     def form_valid(self, form):
-        # Save form fist
-        redirect = super().form_valid(form)
-
-        # Send 'welcome' e-mail to new member + parents
+        # van oude site
         recipients = form.cleaned_data['email_ouder1'].split(',')
         recipients.append(form.cleaned_data['email_address'])
+        subject = 'Update ledenlijst van scouting St Ansfridus'
+        body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
+        send_mail(subject=subject, message=body, from_email=settings.EMAIL_SENDER,
+                      recipient_list=settings.EMAIL_RECIPIENTS_UPDATE)
+        return super(MemberCreateView, self).form_valid(form)
+        # Save form fist
+#        redirect = super().form_valid(form)
 
-        message = EmailMessage()
-        message.to = recipients
-        message.subject = "Welkom bij St Ansfridus Amersfoort!"
-        message.from_email = settings.EMAIL_SENDER
-        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
-        message.content_subtype = 'html'
-        Utils.send_email(message, self.request.user.first_name, form.instance)
+        # Send 'welcome' e-mail to new member + parents
+#        recipients = form.cleaned_data['email_ouder1'].split(',')
+#        recipients.append(form.cleaned_data['email_address'])
+
+#        message = EmailMessage()
+#        message.to = recipients
+#        message.subject = "Welkom bij St Ansfridus Amersfoort!"
+#        message.from_email = settings.EMAIL_SENDER
+#        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
+#        message.content_subtype = 'html'
+#        Utils.send_email(message, self.request.user.first_name, form.instance)
 #        message.send()
 
 #        response = requests.get(Utils.get_setting('welcome_pdf_location'))
@@ -176,7 +184,7 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
 #            message.attach('Welkom bij Ansfridus Amersfoort.pdf', response.content)
 
 
-        return redirect
+#        return redirect
 
     def get_success_url(self):
         return reverse('members')
