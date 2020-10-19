@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.db.models import F, Q
 from django.conf import settings
 from django.utils import timezone
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from requests_oauthlib import OAuth2Session
 from django.template.loader import render_to_string
 import csv
