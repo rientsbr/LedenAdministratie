@@ -168,12 +168,12 @@ class MemberCreateView(PermissionRequiredMixin, CreateView):
         message.from_email = settings.EMAIL_SENDER
         message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
         message.content_subtype = 'html'
-        message.send()
+#        message.send()
 
 #        response = requests.get(Utils.get_setting('welcome_pdf_location'))
 #        if response.ok:
 #            message.attach('Welkom bij Ansfridus Amersfoort.pdf', response.content)
-#            Utils.send_email(message, self.request.user.first_name, form.instance)
+            Utils.send_email(message, self.request.user.first_name, form.instance)
 
         return redirect
 
