@@ -10,3 +10,4 @@ django-tinymce==2.9.0
 django-dkim
 gunicorn
 requests
+cryptography==2.1.4
