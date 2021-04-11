@@ -88,15 +88,7 @@ class Member(models.Model):
 
     def is_begeleider(self):
         slugs = [membertype.slug for membertype in self.types.all()]
-        return 'begeleider' in slugs
-
-    def is_ondersteuner(self):
-        slugs = [membertype.slug for membertype in self.types.all()]
-        return 'ondersteuning' in slugs
-
-    def is_aspirant(self):
-        slugs = [membertype.slug for membertype in self.types.all()]
-        return 'aspirant' in slugs
+        return 'begeleider' in slugs or 'aspirant' in slugs or 'ondersteuning' in slugs
 
     def is_senior(self):
         slugs = [membertype.slug for membertype in self.types.all()]
@@ -110,23 +102,37 @@ class Member(models.Model):
     gebdat = models.DateField(verbose_name='Geboorte Datum')
     geslacht = models.CharField(max_length=1, choices=(('m', 'Man'), ('v', 'Vrouw'), ('o', 'Anders')), blank=False,
                                 null=False, default='m')
-    types = models.ManyToManyField(MemberType)
+    speltak = models.CharField(max_length=40, blank=True)
+    types = models.ManyToManyField(MemberType)									# Nieuw voor
     email_address = models.EmailField(max_length=200, validators=[EmailValidator(message='E-mail adres is ongeldig')])
     straat = models.CharField(max_length=255)
-    postcode = models.CharField(max_length=7, validators=[
-        RegexValidator(regex='\d\d\d\d\s?[A-Za-z]{2}', message='De postcode is ongeldig')])
+    postcode = models.CharField(max_length=7, validators=[RegexValidator(regex='\d\d\d\d\s?[A-Za-z]{2}', message='De postcode is ongeldig')])
     woonplaats = models.CharField(max_length=100)
     telnr = models.CharField(max_length=30, blank=True)
-    telnr_ouders = models.CharField(max_length=30, blank=False)
-    email_ouders = models.CharField(max_length=200, blank=False)
-    aanmeld_datum = models.DateField(verbose_name='Aanmeld datum', auto_now=False)
+    mobiel = models.CharField(max_length=30, blank=True)
+    mobiel_ouder1 = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
+    mobiel_ouder2 = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
+#    telnr_ouders = models.CharField(max_length=30, blank=False)
+#    email_ouders = models.CharField(max_length=200, blank=False)
+    email_ouder1 = models.EmailField(max_length=150, blank=True)
+    email_ouder2 = models.EmailField(max_length=150, blank=True)
+    aanmeld_datum = models.DateField(auto_now_add=True, auto_now=False)
     afmeld_datum = models.DateField(verbose_name='Afmeld datum', null=True, blank=True)
-    dag_vrijdag = models.BooleanField(null=False, default=False)
-    dag_zaterdag = models.BooleanField(null=False, default=False)
+    inschrijf_datum_sn = models.DateField(null=True, blank=True)
+    scouting_nr = models.CharField(max_length=20, blank=True)
+    tshirt_maat = models.CharField(max_length=20, blank=True)
+    jub_badge = models.CharField(max_length=20, blank=True)
+    verzekerings_nr = models.CharField(max_length=20, blank=True)
+    opmerkingen = models.TextField(max_length=1024, blank=True)
+    bijzonderheden = models.TextField(max_length=1024, blank=True)
+    fotopubliek = models.BooleanField(null=False, default=True)
+    fotobinnen = models.BooleanField(null=False, default=True)
     foto = models.BinaryField(blank=True, null=True, verbose_name='Foto', editable=True)
     thumbnail = models.BinaryField(blank=True, null=True, verbose_name='Thumbnail', editable=True)
-    hoe_gevonden = models.CharField(max_length=255, blank=True, null=False, default='')
     age = property(_calculate_age)
+    wachtlijst_speltak = property(_calculate_speltak)
+#	foto1 = property(_calculate_foto)
+#    foto2 = property(_calculate_foto2)
 
 
 class Note(models.Model):

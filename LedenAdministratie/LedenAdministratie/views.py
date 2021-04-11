@@ -84,7 +84,7 @@ class LogoffView(PermissionRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         logout(request)
-        return HttpResponse(content='Uitgelogd')
+        return HttpResponseRedirect('/')
 
 
 class LidAanmeldView(CreateView):
@@ -149,33 +149,45 @@ class MemberUpdateView(PermissionRequiredMixin, UpdateView):
 class MemberCreateView(PermissionRequiredMixin, CreateView):
     model = Member
     template_name = 'edit_member.html'
-    success_url = reverse_lazy('members')
+#    success_url = reverse_lazy('members')
     form_class = forms.MemberForm
     extra_context = {'types': MemberType.objects.all()}
     required_permission = 'LedenAdministratie.add_member'
 
     def form_valid(self, form):
+        # van oude site
+        recipients = form.cleaned_data['email_ouder1'].split(',')
+        recipients.append(form.cleaned_data['email_address'])
+        subject = 'Update ledenlijst van scouting St Ansfridus'
+        body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
+        send_mail(subject=subject, message=body, from_email=settings.EMAIL_SENDER,
+                      recipient_list=settings.EMAIL_RECIPIENTS_UPDATE)
+        return super(MemberCreateView, self).form_valid(form)
         # Save form fist
-        redirect = super().form_valid(form)
+#        redirect = super().form_valid(form)
 
         # Send 'welcome' e-mail to new member + parents
-        recipients = form.cleaned_data['email_ouders'].split(',')
-        recipients.append(form.cleaned_data['email_address'])
+#        recipients = form.cleaned_data['email_ouder1'].split(',')
+#        recipients.append(form.cleaned_data['email_address'])
 
-        message = EmailMessage()
-        message.to = recipients
-        message.subject = "Welkom bij DJO Amersfoort!"
-        message.from_email = settings.EMAIL_SENDER
-        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
-        message.content_subtype = 'html'
+#        message = EmailMessage()
+#        message.to = recipients
+#        message.subject = "Welkom bij St Ansfridus Amersfoort!"
+#        message.from_email = settings.EMAIL_SENDER
+#        message.body = render_to_string('emails/welcome_email.html', context={'member': form.instance})
+#        message.content_subtype = 'html'
+#        Utils.send_email(message, self.request.user.first_name, form.instance)
+#        message.send()
 
-        response = requests.get(Utils.get_setting('welcome_pdf_location'))
-        if response.ok:
-            message.attach('Welkom bij DJO Amersfoort.pdf', response.content)
-            Utils.send_email(message, self.request.user.first_name, form.instance)
+#        response = requests.get(Utils.get_setting('welcome_pdf_location'))
+#        if response.ok:
+#            message.attach('Welkom bij Ansfridus Amersfoort.pdf', response.content)
 
-        return redirect
 
+#        return redirect
+
+    def get_success_url(self):
+        return reverse('members')
 
 class MemberDeleteView(PermissionRequiredMixin, DeleteView):
     model = Member
@@ -203,7 +215,7 @@ class MemberAddNoteView(PermissionRequiredMixin, CreateView):
     def form_valid(self, form):
         member_id = self.kwargs['member_id']
         form.instance.member = Member.objects.get(pk=member_id)
-        form.instance.username = self.request.user.first_name
+        form.instance.username = self.request.user.username
         return super().form_valid(form)
 
 
@@ -295,7 +307,7 @@ class InvoiceCreateView(PermissionRequiredMixin, FormView):
             invoice.amount = InvoiceTool.calculate_grand_total(self.lines)
             invoice.amount_payed = 0.00
             invoice.created = timezone.now()
-            invoice.username = self.request.user.first_name
+            invoice.username = self.request.user.username
             invoice.save()
             invoice.pdf = InvoiceTool.render_invoice(member, self.lines, invoice.invoice_number,
                                                      form.cleaned_data['invoice_types'])
@@ -417,7 +429,7 @@ class ExportView(PermissionRequiredMixin, FormView):
         for member in members:
             writer.writerow([member.first_name, member.last_name, member.gebdat, member.age, member.geslacht,
                              member.email_address, member.straat, member.postcode, member.woonplaats, member.telnr,
-                             member.telnr_ouders, member.email_ouders])
+                             member.mobiel_ouder1, member.email_ouder1])
 
         return response
 
@@ -460,15 +472,14 @@ class EmailSendView(PermissionRequiredMixin, FormView):
         recipients = Member.objects.filter(Q(afmeld_datum__gt=date.today()) | Q(afmeld_datum=None))
         for recipient in recipients:
             to_list = []
-            if recipient.is_begeleider() or recipient.is_aspirant():
+            if recipient.is_begeleider():
                 if 'begeleiders' in form.cleaned_data['recipients']:
                     to_list.append(recipient.email_address)
-            elif recipient.is_ondersteuner():
-                if 'ondersteuning' in form.cleaned_data['recipients']:
+                elif 'ondersteuning' in form.cleaned_data['recipients']:
                     to_list.append(recipient.email_address)
             else:
                 if 'parents' in form.cleaned_data['recipients']:
-                    for address in recipient.email_ouders.split(','):
+                    for address in recipient.email_ouder1.split(','):
                         to_list.append(address)
                 if 'members' in form.cleaned_data['recipients']:
                     to_list.append(recipient.email_address)

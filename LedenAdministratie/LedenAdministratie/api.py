@@ -100,7 +100,7 @@ class ApiV1IDPGetDetails(APITokenMixin, View):
             elif field == 'mail':
                 response['mail'] = member.email_address
             elif field == 'mail-parents':
-                response['mail-parents'] = member.email_ouders
+                response['mail-parents'] = member.email_ouder1
             elif field == 'city':
                 response['city'] = member.woonplaats
             elif field == 'zip':
@@ -108,7 +108,7 @@ class ApiV1IDPGetDetails(APITokenMixin, View):
             elif field == 'address':
                 response['address'] = member.straat
             elif field == 'phone':
-                response['phone'] = member.telnr_ouders
+                response['phone'] = member.mobiel_ouder1
             elif field == 'mobile':
                 response['mobile'] = member.telnr
             elif field == 'firstname':
@@ -139,7 +139,7 @@ class ApiV1IDPVerify(APITokenMixin, View):
         for field in fields:
             value = request.POST.get('email', 'xxxxx').lower()
             if field == 'email':
-                result = result.filter(Q(email_address=value) | Q(email_ouders=value))
+                result = result.filter(Q(email_address=value) | Q(email_ouder1=value))
             elif field == 'zip':
                 zipcode = request.POST.get('zip', 'xxxxxx').lower()
                 zip_spaced = zipcode[0:4] + ' ' + zipcode[-2:]

@@ -33,8 +33,12 @@
                         <label for="id_aanmeld_datum">Datum einde lidmaatschap</label>
                         {{ form.afmeld_datum|add_class:'form-control' }}
 
-                        <label for="id_hoe_gevonden">Hoe gevonden?</label>
-                        {{ form.hoe_gevonden|add_class:'form-control' }}
+                        <label for="id_scouting_nr">Scouting Nummer</label>
+                        {{ form.scouting_nr|add_class:'form-control' }}
+
+                        <label for="id_verzekering">Verzekering</label>
+                        {{ form.verzekerings_nr|add_class:'form-control' }}
+
                     </div>
                     <div class="col-lg-5 col-md-6">
                         <label for="id_last_name">Achternaam *</label>
@@ -46,18 +50,24 @@
                         <label for="id_geslacht">Geslacht *</label>
                         {{ form.geslacht|add_class:'form-control' }}
 
+                        <label for="id_tshirt">T-shirt *</label>
+                        {{ form.tshirt_maat|add_class:'form-control' }}
+
+                        <label for="id_jubbadge">Jub Badge *</label>
+                        {{ form.jub_badge|add_class:'form-control' }}
+
                         <label for="id_types">Type</label>
                         {{ form.types|add_class:'form-control' }}
 
-                        <label class="mt-3 ml-3">Dagdeel aanwezig</label>
+                        <label class="mt-3 ml-3">Foto Website</label>
                         <div class="form-check mt-1 ml-3">
-                            {{ form.dag_vrijdag|add_class:'form-check-input' }}
-                            <label for="id_dag_vrijdag">Vrijdag</label>
+                            {{ form.fotobinnen|add_class:'form-check-input' }}
+                            <label for="id_foto_intern">Intern gebruik</label>
                         </div>
 
                         <div class="form-check ml-3">
-                            {{ form.dag_zaterdag|add_class:'form-check-input' }}
-                            <label for="id_dag_zaterdag">Zaterdag</label>
+                            {{ form.fotopubliek|add_class:'form-check-input' }}
+                            <label for="id_foto_publiek">Extern gebruik</label>
                         </div>
                     </div>
                 </div>
@@ -79,10 +89,12 @@
                         {{ form.telnr|add_class:'form-control' }}
 
                         <label for="id_email_ouders">E-mail Ouders *</label>
-                        {{ form.email_ouders|add_class:'form-control' }}
+                        {{ form.email_ouder1|add_class:'form-control' }}
+                        {{ form.email_ouder2|add_class:'form-control' }}
 
                         <label for="id_telnr_ouders">Tel. Nummer Ouders *</label>
-                        {{ form.telnr_ouders|add_class:'form-control' }}
+                        {{ form.mobiel_ouder1|add_class:'form-control' }}
+                        {{ form.mobiel_ouder2|add_class:'form-control' }}
                     </div>
                     <div class="col-2">
                     </div>
