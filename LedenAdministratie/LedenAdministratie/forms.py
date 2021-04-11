@@ -51,7 +51,11 @@ class InvoiceCreateForm(forms.Form):
     TYPES = (
         ('standaard', 'Standaard factuur voor 1 jaar'),
         ('leiding', 'Ook leiding Lid factuur voor 1 jaar'),
+        ('senior', 'Senior Lid factuur voor 1 jaar'),
+        ('maart', 'Factuur voor lid ingeschreven na 1 Maart'),
+        ('2dagen', 'Factuur voor lid dat beide dagen komt'),
         ('sponsor', 'Sponsor factuur'),
+        ('strippenkaart', 'Factuur voor lid met strippenkaart'),
         ('custom', 'Aangepaste factuur')
     )
 
