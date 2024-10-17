@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block navbar %}
+   <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+    <span>Filters</span>
+</h6>
+
+<ul class="nav flex-column">
+    {% for taktag, takname in lid.LIJST_CHOICES %}
+    <li class="nav-item">
+        <a {% if lid.speltak == taktag %} class="nav-link active" {% else %} class="nav-link" {% endif %}
+           href="{% url 'ledenlijst' taktag %}">
+            <span data-feather="filter"></span>{{ takname }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+
+
+{% endblock %}
+
+{% block content %}
+
+{% include 'alerts.html' %}
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-header text-white bg-secondary">Basisgegevens</div>
+                <div class="form-row">
+                    <div class="col-md-5">
+
+                        <label for="id_first_name">Voornaam *</label>
+                        {{ form.first_name|add_class:'form-control' }}
+
+                        <label for="id_straat">Straat *</label>
+                        {{ form.straat|add_class:'form-control' }}
+
+                        <label for="id_woonplaats">Woonplaats *</label>
+                        {{ form.woonplaats|add_class:'form-control' }}
+
+                        <label for="id_gebdat">Geboorte datum *</label>
+                        {{ form.gebdat|add_class:'form-control' }}
+
+                        <label for="id_geslacht">Geslacht *</label>
+                        {{ form.geslacht|add_class:'form-control' }}
+
+                    </div>
+                    <div class="col-md-5">
+                        <label for="id_last_name">Achternaam *</label>
+                        {{ form.last_name|add_class:'form-control' }}
+
+                        <label for="id_postcode">Postcode *</label>
+                        {{ form.postcode|add_class:'form-control' }}
+
+                        <label for="id_email_address">E-mail adres *</label>
+                        {{ form.email_address|add_class:'form-control' }}
+
+                        <label for="id_speltak">Speltak</label>
+                        {{ form.speltak|add_class:'form-control' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-header text-white bg-secondary">Contactgegevens Ouders</div>
+
+                <div class="form-row">
+                    <div class="col-md-5">
+
+
+
+                        <label for="id_mobiel_ouder1">Mobiel Ouder 1</label>
+                        {{ form.mobiel_ouder1|add_class:'form-control' }}
+
+                        <label for="id_email_ouder1">E-mail Ouder 1</label>
+                        {{ form.email_ouder1|add_class:'form-control' }}
+
+                        <label for="id_telnr">Tel. Nummer *</label>
+                        {{ form.telnr|add_class:'form-control' }}
+
+                    </div>
+                    <div class="col-md-5">
+                        <label for="id_mobiel_ouder2">Mobiel Ouder 2</label>
+                        {{ form.mobiel_ouder2|add_class:'form-control' }}
+
+                        <label for="id_email_ouder2">E-mail Ouder 2</label>
+                        {{ form.email_ouder2|add_class:'form-control' }}
+                    </div>
+                </div>
+            </div>
+			        </div>
+    </div>
+
+                <div class="panel-body">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-header text-white bg-secondary">Gegevens Scouting</div>
+                <div class="panel-body">
+
+                    <div class="col-md-5">
+
+                        <label for="id_scouting_nr">Scouting nummer</label>
+                        {{ form.scouting_nr|add_class:'form-control' }}
+
+                        <label for="id_telnr">T-Shirt maat</label>
+                        {{ form.tshirt_maat|add_class:'form-control' }}
+
+                        <label for="id_jub_badge">Jubileum Badges</label>
+                        {{ form.jub_badge|add_class:'form-control' }}
+
+                        <label for="id_opmerkingen">Opmerkingen</label>
+                        {{ form.opmerkingen|add_class:'form-control' }}
+                    </div>
+                    <div class="col-md-5">
+                        <label for="id_inschrijf_datum_sn">Inschrijfdatum SN</label>
+                        {{ form.inschrijf_datum_sn|add_class:'form-control' }}
+
+                        <label for="id_verzekerings_nr">Verzekerings Nr</label>
+                        {{ form.verzekerings_nr|add_class:'form-control' }}
+
+                        <label for="id_bijzonderheden">Bijzonderheden</label>
+                        {{ form.bijzonderheden|add_class:'form-control' }}
+
+                        <br>
+                        <div class="checkbox-inline">
+                            <label for="id_fotopubliek"></label>
+                            {{ form.fotopubliek }} Mogen foto's publiek gepubliceerd worden
+                            <br>
+                            <label for="id_fotobinnen"></label>
+                            {{ form.fotopubliek }} Mogen foto's intern gepubliceerd worden
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+ </div>
+
+    <br>
+    {% if perms.LedenAdministratie.change_lid %}
+    <button type="submit" class="btn btn-success">Opslaan</button>
+    {% endif %}
+    <button onclick="javascript:history.go(-1)" type="button" class="btn btn-secondary">Annuleren</button>
+</form>
+<br/>
+
+
+{% endblock %}

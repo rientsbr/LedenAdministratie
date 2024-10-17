@@ -1,54 +1,43 @@
 from django.db import models
 from datetime import date
 from django.core.validators import RegexValidator, EmailValidator
-from PIL import Image
-from io import BytesIO
 
 
-class MemberType(models.Model):
-    slug = models.SlugField()
-    display_name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.display_name
+class LidManager(models.Manager):
+    def proper_lastname_order(self, *args, **kwargs):
+        qs = self.get_queryset().filter(*args, **kwargs)
+        return sorted(qs, key=lambda n: n.last_name.lower().split()[-1])
 
 
-class Member(models.Model):
-
+class Lid(models.Model):
+    objects = LidManager()
     class Meta:
-        ordering = ["first_name", "last_name"]
+        ordering = ["last_name", "first_name"]
         verbose_name_plural = "Leden"
+        permissions = (
+            ('read_lid', 'Can read leden'),
+        )
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
+    LIJST_CHOICES=[
+        ('wachtlijst', 'Wachtlijst'),
+        ('bevers', 'Bevers'),
+        ('welpen', 'Welpen'),
+        ('scouts', 'Scouts'),
+        ('explorers', 'Explorers'),
+        ('roverscouts', 'Roverscouts'),
+        ('stam', 'Stam'),
+        ('leiding', 'Leiding'),
+        ('bestuur', 'Bestuur'),
+        ('vrijwilliger', 'Vrijwilligers'),
+        ('oudleden', 'Oud-Leden'),
+        ('oudleiding', 'Oud-Leiding'),
+    ]
 
-        if self.thumbnail is None and self.foto is not None:
-            try:
-                with BytesIO(self.foto) as f:
-                    with Image.open(f, "r") as photo:
-                        img_format = photo.format
-                        thumbnail = photo.copy()
-                        thumbnail.thumbnail((100, 150), Image.LANCZOS)
-                        thumbnail.format = img_format
-                        encoded_thumb = BytesIO()
-                        thumbnail.save(encoded_thumb, img_format)
-                        self.thumbnail = encoded_thumb.getvalue()
-            except Exception as e:
-                print("Warning: thumbnail creation failed: {0}".format(str(e)))
-
-        super().save(force_insert, force_update, using=using, update_fields=update_fields)
-
-    def _calculate_age(self, ondate=date.today()):
+    def _calculate_age(self, ondate = date.today()):
         today = ondate
         born = self.gebdat
         return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
 
-    @property
-    def full_name(self):
-        return "{0} {1}".format(self.first_name, self.last_name)
-
-    def get_types_display(self):
-        return ','.join([tmptype.display_name for tmptype in self.types.all()])
 
     def _calculate_speltak(self):
         endofyear = date.today().replace(month=12, day=31)
@@ -73,26 +62,17 @@ class Member(models.Model):
             speltak = 'Leiding'
         return speltak
 
+    def _calculate_foto(self):
+        if self.fotopubliek:
+            return 'Ja'
+        else:
+            return 'Nee'
 
-
-    def idp_types(self):
-        result = []
-        for membertype in self.types.all():
-            name = membertype.slug
-            if name == 'member':
-                name = 'lid'
-            elif name == 'aspirant':
-                name = 'aspirant_begeleider'
-            result.append(name)
-        return ','.join(result)
-
-    def is_begeleider(self):
-        slugs = [membertype.slug for membertype in self.types.all()]
-        return 'begeleider' in slugs or 'aspirant' in slugs or 'ondersteuning' in slugs
-
-    def is_senior(self):
-        slugs = [membertype.slug for membertype in self.types.all()]
-        return 'senior' in slugs
+    def _calculate_foto2(self):
+        if self.fotobinnen:
+            return 'Ja'
+        else:
+            return 'Nee'
 
     def __str__(self):
         return "%s %s" % (self.first_name, self.last_name)
@@ -100,24 +80,19 @@ class Member(models.Model):
     first_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=200)
     gebdat = models.DateField(verbose_name='Geboorte Datum')
-    geslacht = models.CharField(max_length=1, choices=(('m', 'Man'), ('v', 'Vrouw'), ('o', 'Anders')), blank=False,
-                                null=False, default='m')
-    speltak = models.CharField(max_length=40, blank=True)
-    types = models.ManyToManyField(MemberType)									# Nieuw voor
-    email_address = models.EmailField(max_length=200, validators=[EmailValidator(message='E-mail adres is ongeldig')])
+    geslacht = models.CharField(max_length=1, choices=(('m', 'M'),('v','V')), blank=False, null=False, default='m')
+    speltak = models.CharField(max_length=40, choices=LIJST_CHOICES, default='wachtlijst', blank=False, null=False)
+    email_address = models.EmailField(max_length=150, validators=[EmailValidator(message='E-mail adres is ongeldig')])
     straat = models.CharField(max_length=255)
     postcode = models.CharField(max_length=7, validators=[RegexValidator(regex='\d\d\d\d\s?[A-Za-z]{2}', message='De postcode is ongeldig')])
     woonplaats = models.CharField(max_length=100)
-    telnr = models.CharField(max_length=30, blank=True)
-    mobiel = models.CharField(max_length=30, blank=True)
+    telnr = models.CharField(max_length=30)
+    mobiel = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
     mobiel_ouder1 = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
     mobiel_ouder2 = models.CharField(max_length=20, blank=True, validators=[RegexValidator(regex='06.*', message='Mobiel nummer is ongeldig')])
-#    telnr_ouders = models.CharField(max_length=30, blank=False)
-#    email_ouders = models.CharField(max_length=200, blank=False)
     email_ouder1 = models.EmailField(max_length=150, blank=True)
     email_ouder2 = models.EmailField(max_length=150, blank=True)
     aanmeld_datum = models.DateField(auto_now_add=True, auto_now=False)
-    afmeld_datum = models.DateField(verbose_name='Afmeld datum', null=True, blank=True)
     inschrijf_datum_sn = models.DateField(null=True, blank=True)
     scouting_nr = models.CharField(max_length=20, blank=True)
     tshirt_maat = models.CharField(max_length=20, blank=True)
@@ -125,74 +100,9 @@ class Member(models.Model):
     verzekerings_nr = models.CharField(max_length=20, blank=True)
     opmerkingen = models.TextField(max_length=1024, blank=True)
     bijzonderheden = models.TextField(max_length=1024, blank=True)
-    fotopubliek = models.BooleanField(null=False, default=True)
-    fotobinnen = models.BooleanField(null=False, default=True)
-    foto = models.BinaryField(blank=True, null=True, verbose_name='Foto', editable=True)
-    thumbnail = models.BinaryField(blank=True, null=True, verbose_name='Thumbnail', editable=True)
+    fotopubliek = models.BooleanField(default=True, blank=False, verbose_name="Foto's publiceren toegestaan")
+    fotobinnen = models.BooleanField(default=True, blank=False, verbose_name="Foto's binnengroep toegestaan")
     age = property(_calculate_age)
     wachtlijst_speltak = property(_calculate_speltak)
-#	foto1 = property(_calculate_foto)
-#    foto2 = property(_calculate_foto2)
-
-
-class Note(models.Model):
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='notes')
-    created = models.DateField(auto_now_add=True, auto_now=False)
-    username = models.CharField(max_length=255, null=False, default='')
-    done = models.BooleanField(verbose_name='Afgerond', null=False, default=False)
-    text = models.TextField(max_length=65535, null=False, default='')
-
-
-class Invoice(models.Model):
-
-    @property
-    def invoice_number(self):
-        return 'F1{0:0>4}-{1:0>5}'.format(self.member.id, self.pk)
-
-    @property
-    def old_invoice_number(self):
-        return 'F0{0:0>4}-{1:0>5}'.format(self.member.id, self.pk)
-
-    @property
-    def payed(self):
-        return self.amount == self.amount_payed
-
-    @property
-    def amount_unpaid(self):
-        return self.amount - self.amount_payed
-
-    member = models.ForeignKey(Member, on_delete=models.SET_NULL, related_name='invoices', null=True)
-    created = models.DateField(auto_now_add=True, auto_now=False)
-    username = models.CharField(max_length=255, null=False, default='')
-    sent = models.DateTimeField(blank=True, null=True)
-    smtp_error = models.CharField(max_length=4096, null=True, blank=True)
-    amount = models.DecimalField(verbose_name='Bedrag', blank=False, default=0.00, decimal_places=2, max_digits=6)
-    amount_payed = models.DecimalField(verbose_name='Bedrag Betaald', blank=False, default=0.00, decimal_places=2,
-                                       max_digits=6)
-    pdf = models.BinaryField(blank=True, null=True, editable=True)
-
-
-class APIToken(models.Model):
-    token_type = models.CharField(max_length=12)
-    token = models.CharField(max_length=64)
-    expires = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return "{0} - {1}".format(self.token_type, self.token)
-
-
-class Email(models.Model):
-    sent = models.DateTimeField(blank=True, null=True)
-    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='emails', null=True)
-    recipients = models.CharField(max_length=4096)
-    subject = models.CharField(max_length=255)
-    status = models.CharField(max_length=4096)
-    sent_by = models.CharField(max_length=255, null=False, default='')
-
-
-class Setting(models.Model):
-    name = models.CharField(blank=False, null=False, max_length=50)
-    value = models.CharField(blank=True, null=True, max_length=1024)
-
-    def __str__(self):
-        return "{0} = {1}".format(self.name, self.value)
+    foto = property(_calculate_foto)
+    foto2 = property(_calculate_foto2)

@@ -1,4 +1,4 @@
-{% load static %}
+{% load staticfiles %}
 {% load widget_tweaks %}
 
 <!doctype html>
@@ -100,6 +100,10 @@
             </div>
 
 
+            <label for="id_email_ouder2">Om spam te voorkomen vragen we u onderstaande code over te typen:</label>
+            <br>
+            {{ form.captcha|add_class:'form-control' }}
+            <br>
 
 
             <br>

@@ -1,14 +1,14 @@
 {% load l10n %}
-{% load static %}
+{% load staticfiles %}
 
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Ledensite Ansfridus">
+    <meta name="description" content="Ledensite St. Ansfridus">
 
-    <title>Ledenadministratie St Ansfridus</title>
+    <title>Ledenadministratie 00 Ledensite St. Ansfridus</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" crossorigin="anonymous">
@@ -20,9 +20,7 @@
 <body>
 
 <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-    <a class="navbar-brand col-2 mr-0" href="{% url 'members' %}">Leden Ansfrids</a>
-    {% block searchbar %}
-    {% endblock %}
+		 <a class="navbar-brand col-2 mr-0" href="{% url 'ledenlijst' 'wachtlijst' %}">Ledenadministratie St Ansfridus</a>
 </nav>
 
 <div class="container-fluid">
@@ -31,105 +29,56 @@
             <div class="sidebar-sticky">
 
                 {% block navbar %}
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Leden</span>
-                    </h6>
-
-                    <ul class="nav flex-column">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Navigaties</span>
+                </h6>
+               <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a {% if filter_slug == '' %} class="nav-link active" {% else %} class="nav-link" {% endif %} href="{% url 'members' %}">
+                            <a {% if filter_slug == '' %} class="nav-link active" {% else %} class="nav-link" {% endif %} href="{% url 'ledenlijst' 'wachtlijst' %}">
                                 <span data-feather="filter"></span>Alle leden
                             </a>
                         </li>
 
                         {% for type in types %}
                             <li class="nav-item">
-                                <a {% if filter_slug == type.slug %} class="nav-link active" {% else %} class="nav-link" {% endif %} href="{% url 'members' type.slug %}">
+                                <a {% if filter_slug == type.slug %} class="nav-link active" {% else %} class="nav-link" {% endif %} href="{% url 'ledenlijst' type.slug %}">
                                     <span data-feather="filter"></span>{{ type.display_name }}
                                 </a>
                             </li>
                         {% endfor %}
-
+                    {% if perms.LedenAdministratie.change_lid %}
                         <li class="nav-item">
-                            <a {% if filter_slug == 'inactive' %} class="nav-link active" {% else %} class="nav-link" {% endif %} href="{% url 'members' 'inactive' %}">
-                                <span data-feather="trash-2"></span>Inactieve leden
+                            <a class="nav-link" href="{% url 'lid_create' %}">
+                                <span data-feather="user-plus"></span>Nieuw Lid
                             </a>
                         </li>
-
-                        {% if perms.LedenAdministratie.change_lid %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'lid_create' %}">
-                                    <span data-feather="user-plus"></span>Nieuw Lid
-                                </a>
-                            </li>
-                        {% endif %}
+                    {% endif %}
                     </ul>
                 {% endblock %}
 
+
                 <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>Facturen</span>
+                    <span>Overig</span>
                 </h6>
 
                 <ul class="nav flex-column">
+
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'invoice_create' %}">
-                            <span data-feather="plus-circle"></span>Aanmaken
-                        </a>
+                        <a class="nav-link" href="{% url 'export' %}">
+                            <span data-feather="file-text"></span>Excel Export</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'invoice_send' %}">
-                            <span data-feather="mail"></span>Versturen
-                        </a>
+
+                    {% if request.user.is_superuser %}
+                    <li>
+                        <a class="nav-link" href="/admin/">
+                            <span data-feather="users"></span>Gebruikers</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'invoice_payment' %}">
-                            <span data-feather="dollar-sign"></span>Betaling verwerken
-                        </a>
-                    </li>
+                    {% endif %}
                 </ul>
 
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                   <span>E-Mail</span>
-                </h6>
-
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'email_send' %}">
-                            <span data-feather="mail"></span>Versturen
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'email_log' %}">
-                            <span data-feather="list"></span>Logboek
-                        </a>
-                    </li>
-                </ul>
-
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                   <span>Overig</span>
-                </h6>
-
-                <ul class="nav flex-column">
-                   <li class="nav-item">
-                       <a class="nav-link" href="{% url 'todolist' %}">
-                           <span data-feather="calendar"></span>Todo lijst
-                       </a>
-                   </li>
-
-                   <li class="nav-item">
-                       <a class="nav-link" href="{% url 'export' %}">
-                           <span data-feather="file-text"></span>Excel Export</a>
-                   </li>
-
-                   <li class="nav-item">
-                       <a class="nav-link" href="{% url 'settings' %}">
-                           <span data-feather="settings"></span>Instellingen</a>
-                   </li>
-
-                 </ul>
-                 <ul class="nav flex-column mt-4 mb-1">
+                <ul class="nav flex-column mt-4 mb-1">
                     <li><a class="nav-link" href="{% url 'logoff' %}"><span data-feather="log-out"></span>Uitloggen</a></li>
-                 </ul>
+                </ul>
             </div>
         </nav>
 

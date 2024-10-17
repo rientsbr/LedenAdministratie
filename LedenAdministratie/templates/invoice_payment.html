@@ -1,9 +1,4 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block searchbar %}
-    <input class="form-control form-control-dark w-100" type="text" placeholder="Zoek factuurnummer..." id="searchbar">
-{% endblock %}
 
 {% block content %}
 
@@ -32,13 +27,13 @@
             <tbody>
             {% for invoice in object_list %}
                 <tr>
-                    <td><a target="_blank" href="{% url 'invoice_display' invoice.id %}" class="text-dark">{{ invoice.invoice_number }}</a></td>
+                    <td>{{ invoice.invoice_number }}</td>
                     <td><a href="{% url 'lid_edit' invoice.member.pk %}" class="text-dark">{{ invoice.member.full_name }}</a></td>
                     <td>{{ invoice.created }}</td>
                     <td>{{ invoice.username|capfirst }}</td>
                     <td>{{ invoice.sent|default:"Niet verstuurd" }}</td>
                     <td>{{ invoice.amount }}</td>
-                    <td>{{ invoice.amount_unpaid }}</td>
+                    <td>{{ invoice.amount_unpayed }}</td>
                     <td><a class="btn-sm btn-success" href="#" data-toggle="modal" data-target="#showInvoicePayFullModal{{ invoice.pk }}"><span data-feather="check"></span>
                     </a>
                         <!-- Invoice Pay Full confirm Modal -->
@@ -94,9 +89,4 @@
         </table>
     </div>
 
-{% endblock %}
-
-
-{% block customscript %}
-<script src="{% static 'js/search_and_sort.js' %}"></script>
 {% endblock %}
