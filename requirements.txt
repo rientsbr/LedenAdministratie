@@ -1,0 +1,13 @@
+Django~=3.0
+django-widget-tweaks==1.4.3
+mysqlclient
+python-dateutil
+Weasyprint
+requests-oauthlib
+django-allauth
+Pillow
+django-tinymce==2.9.0
+django-dkim
+gunicorn
+requests
+cryptography==2.1.4

@@ -1,7 +1,0 @@
-Django~=1.11
-django-widget-tweaks==1.4.1
-mysqlclient
-python-dateutil
-django-allauth==0.24.1
-django-simple-captcha
-gunicorn

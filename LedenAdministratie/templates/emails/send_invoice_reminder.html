@@ -1,0 +1,19 @@
+<html>
+
+{% if 'member' in member_types %}
+Beste ouders/verzorgers van {{ invoice.member.full_name }},<br>
+{% else %}
+Beste {{ invoice.member.full_name }},<br>
+{% endif %}
+<br>
+Volgens onze administratie is de bijgevoegde factuur nog niet betaald.<br>
+Graag zien wij de betaling van deze factuur alsnog tegemoet.<br>
+<br>
+<br>
+Met vriendelijke groet,<br>
+<br>
+Albert Waaijenberg<br>
+Voorzitter<br>
+Scouting St Ansfridus Amersfoort<br>
+
+</html>

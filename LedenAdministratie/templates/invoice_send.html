@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
 <div class="alert alert-info bg-secondary text-white" xmlns="http://www.w3.org/1999/html">
-    Aantal nog te versturen facturen:
+    Aantal nog openstaande facturen:
     <span class="badge badge-light">{{ object_list.count }}</span>
 </div>
 
@@ -15,7 +16,7 @@
         <table class="table table-hover table-sm">
             <thead class="thead-light">
             <tr>
-                <th></th>
+                <th><input type="checkbox" id="selectAll" checked></th>
                 <th>Factuur Nr.</th>
                 <th>Factuur voor</th>
                 <th>Aangemaakt op</th>
@@ -24,23 +25,23 @@
                 <th>Bedrag</th>
                 <th>Openstaand bedrag</th>
                 <th></th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
             {% for invoice in object_list %}
                 <tr>
-                    <td><input type="checkbox" id="id_invoices[]" value="{{ invoice.pk }}></td>
+                    <td><input type="checkbox" name="invoices" id="id_invoices_{{ forloop.counter0 }}" value="{{ invoice.pk }}"></td>
                     <td>{{ invoice.invoice_number }}</td>
                     <td><a href="{% url 'lid_edit' invoice.member.pk %}" class="text-dark">{{ invoice.member.full_name }}</a></td>
                     <td>{{ invoice.created }}</td>
                     <td>{{ invoice.username|capfirst }}</td>
-                    <td>{{ invoice.sent|default:"Niet verstuurd" }}</td>
+                    {% if invoice.smtp_error and invoice.smtp_error != '' %}
+                      <td><span title="{{ invoice.smtp_error }}">{{ invoice.smtp_error|truncatechars:30 }}</span></td>
+                    {% else %}
+                      <td>{{ invoice.sent|default:"Niet verstuurd" }}</td>
+                    {% endif %}
                     <td>{{ invoice.amount }}</td>
-                    <td>{{ invoice.amount_unpayed }}</td>
-
-                    <td><a class="btn-sm btn-secondary" href="{% url 'invoice_pay_part' invoice.pk %}"><span
-                            data-feather="send"></span></a></td>
+                    <td>{{ invoice.amount_unpaid }}</td>
 
                     <td><a target="_blank" href="{% url 'invoice_display' invoice.id %}"><span
                             data-feather="eye"></span></a></td>
@@ -49,9 +50,62 @@
             </tbody>
         </table>
 
-        <input type="submit" class="btn btn-primary" value="Versturen">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#sendModal">
+          Versturen
+        </button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#reminderModal">
+          Herinnering
+        </button>
+
+        <!-- sendModal -->
+        <div class="modal fade" id="sendModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="sendModalLabel">Facturen versturen?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                Weet u zeker dat u de geselecteerde facturen wilt versturen?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                <input type="submit" name="send" class="btn btn-primary" value="Versturen">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- reminderModal -->
+        <div class="modal fade" id="reminderModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="reminderModalLabel">Herinnering versturen?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                Weet u zeker dat u voor de geselecteerde facturen een herinnering wil sturen?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                <input type="submit" name="reminder" class="btn btn-primary" value="Versturen">
+              </div>
+            </div>
+          </div>
+        </div>
+
     </div>
 
 </form>
 
+{% endblock %}
+
+{% block customscript %}
+    <script src="{% static 'js/checkbox.js' %}"></script>
+    <script src="{% static 'js/search_and_sort.js' %}"></script>
 {% endblock %}

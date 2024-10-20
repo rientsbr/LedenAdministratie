@@ -1,87 +1,141 @@
-from LedenAdministratie.models import Lid
-from dateutil.parser import parse
+#!/usr/bin/env python3
 
-def fix_phone(nr):
-    if nr != '' and not nr.startswith('0'):
-        nr = '0' + nr
-    nr = ''.join(i for i in nr if ord(i) < 128)
-    nr = nr.replace(' ', '')
-    return nr
+#
+#  DJANGO_SETTINGS_MODULE=LedenAdministratie.LedenAdministratie.settings ./import_data.py
+#
 
-def fix_datum(dt, nullok=True):
-    dt = dt.strip()
-    if dt == '' and not nullok:
-        return parse('01-01-1900')
-    elif dt == '':
-        return None
-    return parse(dt, dayfirst=True)
+import MySQLdb
+import django
+django.setup()
+from LedenAdministratie.LedenAdministratie.models import *
+from datetime import date, datetime
+from dateutil import parser
 
 
-with open("Ledenlijst.csv", 'r', encoding='iso8859-15') as csv:
-    first = True
-    for line in csv.readlines():
-        if first:
-            first = False
+def map_types(member, types):
+    type_map = {
+        'lid': MemberType.objects.get(slug='member'),
+        'begeleider': MemberType.objects.get(slug='begeleider'),
+        'aspirant_begeleider': MemberType.objects.get(slug='aspirant'),
+        'bestuur': MemberType.objects.get(slug='bestuur'),
+        'sponsor': MemberType.objects.get(slug='sponsor'),
+        'senior': MemberType.objects.get(slug='senior'),
+        'strippenkaart': MemberType.objects.get(slug='strippenkaart')
+    }
+
+    for member_type in types.split(','):
+        if member_type != '':
+            member.types.add(type_map[member_type])
+
+    return member
+
+
+def main():
+    password = input("Password: ")
+    db = MySQLdb.connect(host='127.0.0.1', port=3306, user='djo_admin', password=password, db='djo_admin', charset='utf8')
+    cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+    query = """
+        SELECT *, dagdeel.dag FROM contact
+        INNER JOIN contact_dagdeel cd
+        INNER JOIN dagdeel
+        ON (cd.contact_id = contact.id AND cd.dagdeel_id = dagdeel.id)
+        WHERE contact.eind_datum IS NULL
+        AND dagdeel.eind_datum IS NULL
+    """
+
+    cursor.execute(query)
+    for contact in cursor.fetchall():
+        print(contact)
+        member = Member()
+        member.id = contact['id']
+        member.first_name = contact['voornaam']
+        if contact['tussenvoegsels'] and contact['tussenvoegsels'] != '':
+            member.last_name = contact['tussenvoegsels'] + " "  + contact['achternaam']
+        else:
+            member.last_name = contact['achternaam']
+        member.email_address = contact['emailadres']
+        if contact['emailadres_ouders']:
+            member.email_ouders = contact['emailadres_ouders']
+        else:
+            member.email_ouders = ''
+        if contact['geboortedatum']:
+            member.gebdat = contact['geboortedatum']
+        else:
+            member.gebdat = parser.parse('1970-01-01')
+        member.straat = contact['adres']
+        member.postcode = contact['postcode']
+        member.woonplaats = contact['woonplaats']
+        member.telnr = contact['mobielnummer']
+        member.telnr_ouders = contact['telefoonnummer']
+        if contact['begin_datum']:
+            member.aanmeld_datum = contact['begin_datum']
+        else:
+            member.aanmeld_datum = date.today()
+        member.afmeld_datum = contact['eind_datum']
+        member.hoe_gevonden = contact['hoe_gevonden']
+        if contact['dagdeel.dag'] == 'vr':
+            member.dag_vrijdag = True
+        if contact['dagdeel.dag'] == 'za':
+            member.dag_zaterdag = True
+
+        try:
+            with open("export/images/contacten/{0}.jpg".format(member.id), "rb") as f:
+                member.foto = f.read()
+        except:
+            print("Warning: no photo found for id {0}".format(member.id))
+
+        member.save()
+        member = map_types(member, contact['type'])
+        member.save()
+
+    # Import notes
+    cursor.execute("SELECT * FROM notitie")
+    for note in cursor.fetchall():
+        try:
+            member = Member.objects.get(id=note['contact_id'])
+        except Member.DoesNotExist:
             continue
-        fields = line.split(';')
-        print("Importing: %s" % fields[0])
-        lid = Lid()
-        geslacht = fields[1].strip('(').strip(')').lower()
-        lid.geslacht = geslacht
-        lid.first_name = fields[2].strip()
-        lid.last_name = fields[3].strip()
-        lid.email_address = fields[4].strip()
-        print("Datum: " + fields[5].strip())
-        lid.gebdat = fix_datum(fields[5].strip(), nullok=False)
-        lid.straat = fields[6].strip()
-        lid.woonplaats = fields[7].strip().title()
-        lid.telnr = fix_phone(fields[8].strip())
-        lid.postcode = fields[9].strip()
-        lid.scouting_nr = fields[10].strip()
-        speltak = fields[11].strip().lower()
-        if speltak.lower() == 'stamgroep':
-            speltak = 'stam'
-        lid.speltak = speltak
-        lid.aanmeld_datum = fix_datum(fields[12].strip())
-        lid.inschrijf_datum_sn = fix_datum(fields[13].strip())
-        lid.mobiel = fix_phone(fields[14].strip())
-        lid.tshirt_maat = fields[15].strip()
-        lid.verzekerings_nr = fields[16].strip()
-        lid.jub_badge = fields[17].strip()
-        lid.opmerkingen = fields[18].strip()
-        lid.bijzonderheden = fields[19].strip()
-        lid.mobiel_ouder1 = fix_phone(fields[20].strip())
-        lid.mobiel_ouder2 = fix_phone(fields[21].strip())
-        lid.email_ouder1 = fields[22].strip()
-        lid.email_ouder2 = fields[23].strip()
-        lid.save()
-        lid.aanmeld_datum = fix_datum(fields[12].strip())
-        lid.save()
+        print(note)
+        newnote = Note()
+        newnote.id = note['id']
+        newnote.member = member
+        newnote.text = note['tekst']
+        newnote.created = datetime.fromtimestamp(int(note['datum_tijd']))
+        newnote.username = 'Importer'
+        newnote.done = (note['toekomst'] == '0')
+        newnote.save()
+        newnote.created = datetime.fromtimestamp(int(note['datum_tijd']))
+        newnote.save()
+
+    # Imort invoices
+    cursor.execute("SELECT * FROM factuur")
+    for invoice in cursor.fetchall():
+        try:
+            member = Member.objects.get(id=invoice['contact_id'])
+        except Member.DoesNotExist:
+            continue
+        print(invoice)
+        newinvoice = Invoice()
+        newinvoice.id = invoice['id']
+        newinvoice.member = member
+        newinvoice.username = 'Importer'
+        newinvoice.amount = invoice['bedrag']
+        if invoice['betaald'] == '1':
+            newinvoice.amount_payed = newinvoice.amount
+            newinvoice.sent = newinvoice.created
+        newinvoice.created = invoice['datum']
+        newinvoice.save()
+
+        try:
+            with open("export/facturen/{0}.pdf".format(newinvoice.old_invoice_number), "rb") as f:
+                newinvoice.pdf = f.read()
+        except:
+            print("Warning: no invoice PDF found: export/facturen/{0}.pdf".format(newinvoice.old_invoice_number))
+
+        newinvoice.created = invoice['datum']
+        newinvoice.save()
 
 
-# 0    memID;
-# 1    Geslacht;
-# 2    Voornaam;
-# 3    Achternaam;
-# 4    Email;
-# 5    GebDatum;
-# 6    Straat;
-# 7    Plaats;
-# 8    Telefoon;
-# 9    PostC;
-# 10    ScoutingNummer;
-# 11    Speltak;
-# 12    JoinDate;
-# 13    InschrijfDatum;
-# 14    Mobiel;
-# 15    Tshirt;
-# 16    Verzekering;
-# 17    Jubbadge;
-# 18    Opmerkingen;
-# 19    Bijzonderheden;
-# 20    MobielOuder1;
-# 21    MobielOuder2;
-# 22    EmailOuder1;
-# 23    EmailOuder2;
-# 24    Leeftijd
-# 25    31 / 12
+if __name__ == '__main__':
+    main()

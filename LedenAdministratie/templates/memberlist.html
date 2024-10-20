@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block searchbar %}
+    <input class="form-control form-control-dark w-100" type="text" placeholder="Zoeken..." id="searchbar">
+{% endblock %}
+
+{% block content %}
+
+    <div class="alert alert-info bg-secondary text-white">
+        Aantal leden op deze lijst:
+        <span class="badge badge-light">{{ count }}</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-sm" id="membersTable">
+            <thead class="thead-light">
+            <tr>
+                <th>Naam</th>
+                <th>Straat</th>
+                <th>Woonplaats</th>
+                <th>Tel. Nr.</th>
+                <th>Aangemeld op</th>
+                <th>Leeftijd</th>
+                <th>Type</th>
+                {% if filter_slug == 'inactive' %}
+                    <th></th>
+                {% endif %}
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for lid in object_list %}
+
+                <tr>
+                    <td><a href="{% url 'lid_edit' lid.pk %}" class="text-dark">{{ lid }}</a></td>
+                    <td>{{ lid.straat }}</td>
+                    <td>{{ lid.woonplaats }}</td>
+                    <td>{{ lid.telnr }}</td>
+                    <td>{{ lid.aanmeld_datum|date:"d-m-Y" }}</td>
+                    <td>{{ lid.age }}</td>
+                    <td>{{ lid.get_types_display }}</td>
+                    {% if perms.LedenAdministratie.change_lid %}
+                        <td>
+                            <a href="{% url 'lid_edit' lid.pk %}" class="btn-sm btn-success">
+                                <span data-feather="edit"></span>
+                            </a>
+                        </td>
+                        {% if filter_slug == 'inactive' %}
+                        <td>
+                            <a href="{% url 'lid_delete' lid.pk %}" class="btn-sm btn-danger">
+                                <span data-feather="trash-2"></span>
+                            </a>
+                        </td>
+                        {% endif %}
+                    {% else %}
+                        <td>
+                            <a href="{% url 'lid_edit' lid.pk %}" class="btn-sm btn-success">
+                                <span data-feather="edit"></span>
+                            </a>
+                        </td>
+                    {% endif %}
+                </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+
+{% block customscript %}
+<script src="{% static 'js/search_and_sort.js' %}"></script>
+{% endblock %}
